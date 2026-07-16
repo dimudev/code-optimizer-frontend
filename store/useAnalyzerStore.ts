@@ -1,0 +1,138 @@
+import { analyzeService } from '@/services/analyzer.service';
+import { CodeAction, ICodeHistory } from '@/types';
+import { create } from 'zustand';
+
+export interface IAnalyzerState {
+  code: string
+  action: CodeAction
+  currentResult: string | null
+
+  history: Map<string, ICodeHistory>;
+
+  isAnalyzing: boolean
+  isLoadingHistory: boolean
+  error: string | null
+
+}
+
+export interface IAnalyzerActions {
+  setCode: (code: string) => void
+  setAction: (action: CodeAction) => void
+  clearState: () => void
+
+  runAnalysis: () => Promise<void>;
+  fetchHistory: () => Promise<void>;
+  fetchHistoryById: (id: string) => Promise<void>
+}
+
+const initialState: IAnalyzerState = {
+  code: '// Write or paste code here',
+  action: 'optimize',
+  currentResult: null,
+  history: new Map(),
+  isAnalyzing: false,
+  isLoadingHistory: false,
+  error: null,
+};
+
+export const useAnalyzerStore = create<IAnalyzerState & IAnalyzerActions>()((set, get) => ({
+
+  ...initialState,
+  setCode: (code) => set({ code }),
+  setAction: (action) => set({ action }),
+  clearState: () => set({ ...initialState }),
+
+  runAnalysis: async () => {
+
+    const { code, action } = get()
+
+    if (!code.trim()) {
+      set({ error: 'Please write something of code' })
+      return
+    }
+
+    set({ isAnalyzing: true, error: null })
+
+    try {
+
+      const { result } = await analyzeService.addAnalyze({ code, action })
+
+      const updateHistory = new Map(get().history)
+      updateHistory.set(result.id, result)
+
+      set({ currentResult: result.aiResponse, history: updateHistory })
+
+    } catch (err: unknown) {
+      console.error('Error analyzing code:', err)
+
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Failed to analyze code.'
+
+      set({ error: errorMessage })
+    } finally {
+      set({ isAnalyzing: false })
+    }
+
+  },
+
+  fetchHistory: async () => {
+
+    set({ isLoadingHistory: true, error: null })
+
+    try {
+      const { result } = await analyzeService.readAllAnalyzesHistory()
+
+      const historyMap = new Map<string, ICodeHistory>()
+      result.forEach(item => {
+        historyMap.set(item.id, item)
+      })
+
+      set({ history: historyMap })
+
+    } catch (err: unknown) {
+      console.error('Error fetching all the history');
+
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Failed to load all the history details'
+      set({ error: errorMessage })
+    } finally {
+      set({ isLoadingHistory: false })
+    }
+  },
+
+  fetchHistoryById: async (id: string) => {
+
+    if (!id) {
+      set({ error: 'Please provide a valid ID' })
+      return
+    }
+
+    set({ isAnalyzing: true, error: null })
+
+    try {
+      const { result } = await analyzeService.readAnalyzeHistoryById(id)
+
+      if (result) {
+        set({
+          code: result.originalCode,
+          action: result.action,
+          currentResult: result.aiResponse
+        })
+      }
+
+    } catch (err: unknown) {
+      console.error('Error fetching history by ID', err)
+
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Failed to load the history details'
+      set({ error: errorMessage })
+
+    } finally {
+      set({ isAnalyzing: false })
+    }
+  }
+
+}))
