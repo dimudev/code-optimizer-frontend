@@ -3,7 +3,7 @@ import { CodeAction, ICodeHistory } from '@/types';
 import { create } from 'zustand';
 
 export interface IAnalyzerState {
-  code: string
+  code: string ,
   action: CodeAction
   currentResult: string | null
 
@@ -25,22 +25,22 @@ export interface IAnalyzerActions {
   fetchHistoryById: (id: string) => Promise<void>
 }
 
-const initialState: IAnalyzerState = {
+const initialCodeState = {
   code: '// Write or paste code here',
-  action: 'optimize',
+  action: 'optimize' as CodeAction,
   currentResult: null,
-  history: new Map(),
-  isAnalyzing: false,
-  isLoadingHistory: false,
-  error: null,
 };
 
 export const useAnalyzerStore = create<IAnalyzerState & IAnalyzerActions>()((set, get) => ({
 
-  ...initialState,
+  ...initialCodeState,
+  history: new Map(),
+  isAnalyzing: false,
+  isLoadingHistory: false,
+  error: null,
   setCode: (code) => set({ code }),
   setAction: (action) => set({ action }),
-  clearState: () => set({ ...initialState }),
+  clearState: () => set({ ...initialCodeState }),
 
   runAnalysis: async () => {
 
