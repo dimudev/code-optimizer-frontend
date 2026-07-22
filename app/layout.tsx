@@ -29,26 +29,38 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
-      <body>
+      {/* Agregamos overflow-hidden en body para evitar scrolls no deseados del navegador */}
+      <body className="overflow-hidden">
         <ThemeProvider>
           <AppProvider>
-            <div className="flex h-svh w-svw text-f oreground">
-              <aside className="h-full w-[20%] xl:w-[15%] 2xl:w-[15%] ">
-                <Sidebar/>
+            {/* h-svh y w-svw con overflow-hidden aseguran un marco estricto del tamaño de pantalla */}
+            <div className="flex h-svh w-svw overflow-hidden text-foreground">
+            
+              {/* Sidebar con shrink-0 para evitar que se deforme */}
+              <aside className="h-full w-[20%] xl:w-[15%] 2xl:w-[15%] shrink-0">
+                <Sidebar />
               </aside>
+
               <Separator orientation="vertical" />
-              <div className="flex flex-col h-full w-[80%] xl:w-[85%] 2xl:w-[85%]">
-                <header className="w-full h-[8%] flex items-center px-4">
-                  <Header/>
+
+              {/* Panel principal: flex-1 para ocupar el espacio horizontal restante + min-w-0 */}
+              <div className="flex flex-col h-full flex-1 min-w-0 min-h-0 overflow-hidden">
+              
+                {/* Header: shrink-0 para que NUNCA se reduzca ni fuerce cálculos de porcentaje */}
+                <header className="w-full shrink-0 flex items-center px-4 py-3">
+                  <Header />
                 </header>
-                <main className="h-[92%] w-full overflow-hidden">
+
+                {/* Main: flex-1 para tomar exactamente TODO el alto restante, sin percentages */}
+                <main className="flex-1 w-full min-h-0 min-w-0 overflow-hidden">
                   {children}
                 </main>
+
               </div>
             </div>
           </AppProvider>
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

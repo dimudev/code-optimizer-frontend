@@ -4,6 +4,7 @@ import { Play } from "lucide-react"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CodeAction } from "@/types"
 import { useAnalyzerStore } from "@/store/useAnalyzerStore"
+import { useShallow } from "zustand/shallow"
 
 interface ISelectOptions {
   label: string
@@ -17,9 +18,15 @@ const items: Array<ISelectOptions> = [
 ]
 
 const Header = () => {
+  const {code, action, setAction, runAnalysis} = useAnalyzerStore(
+    useShallow(state => ({
+      code: state.code,
+      action: state.action,
+      setAction: state.setAction,
+      runAnalysis: state.runAnalysis,
+    }))
+  )
 
-  const action = useAnalyzerStore(state => state.action)
-  const setAction = useAnalyzerStore(state => state.setAction)
 
   return (
     <>
@@ -42,7 +49,7 @@ const Header = () => {
             </SelectGroup>  
           </SelectContent>
         </Select>
-        <Button className="cursor-pointer"> <Play/> Run</Button>
+        <Button disabled={!code} className="cursor-pointer" onClick={runAnalysis}> <Play/> Run</Button>
       </div>
     </>
   )

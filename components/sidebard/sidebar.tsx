@@ -1,23 +1,21 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useAnalyzerStore } from '@/store/useAnalyzerStore'
 import { SidebarHeader } from './header'
-import { ICodeHistory } from '@/types'
 import { HistoryCard } from './history-card'
 import { NewSession } from './new-session'
 
-
 export const Sidebar = () => {
+  const history = useAnalyzerStore((state) => state.history)
 
-  const history = useAnalyzerStore(state => state.history)
-
-  const historyList:Array<ICodeHistory> = Array.from(history.values())
+  const historyList = useMemo(() => Array.from(history.values()), [history])
 
   return (
-    <aside className="flex h-screen w-full flex-col gap-6  p-4">
+    <aside className="flex h-screen w-full flex-col gap-6 p-4">
       <SidebarHeader />
 
-      <NewSession/>
+      <NewSession />
 
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
         <span className="px-2 text-xs font-semibold tracking-wider text-zinc-400 uppercase">

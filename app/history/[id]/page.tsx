@@ -1,6 +1,7 @@
 'use client'
 import { CodeWorkspace } from '@/components/code/code-work-space'
-import { use } from 'react'
+import { useAnalyzerStore } from '@/store/useAnalyzerStore'
+import { use, useEffect } from 'react'
  
 export default function BlogPostPage({
   params,
@@ -8,7 +9,12 @@ export default function BlogPostPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  console.log('id', id)
+  const fetchHistoryById = useAnalyzerStore(state => state.fetchHistoryById)
+
+  useEffect(() => {
+    fetchHistoryById(id)
+  }, [fetchHistoryById, id])
+  
   
   return <CodeWorkspace readOnly={true} />;
 }

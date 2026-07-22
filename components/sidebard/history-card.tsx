@@ -1,3 +1,4 @@
+import { formatDate } from '@/lib/utils';
 import { ICodeHistory } from '@/types';
 import { Zap } from 'lucide-react';
 import Link from 'next/link';
@@ -15,7 +16,6 @@ export const HistoryCard = ({ item }: HistoryCardProps) => {
   return (
     <Link
       href={`/history/${item.id}`}
-      // onClick={() => onClick?.(item.id)}
       className={`group flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors ${
         item.id === id ? 'bg-zinc-800' : 'bg-zinc-900/60 hover:bg-zinc-800/60'
       }`}
@@ -26,7 +26,7 @@ export const HistoryCard = ({ item }: HistoryCardProps) => {
           {item.originalCode}
         </h3>
         <p className="mt-0.5 text-xs text-zinc-400">
-          {item.action} · {item.createdAt}
+          {item.action} · {formatDate(item.createdAt)}
         </p>
       </div>
     </Link>
